@@ -13,35 +13,52 @@ const update = async (req, res) => {
         return res.status(404).json({"Not Found" : "User not found"})
     }
 
-    if (!req.body || typeof req.body.name != 'string' || typeof req.body.email != 'string' || typeof req.body.age != 'number') {
-         return res.status(400).json({"Bad Request": "INVALID REQUEST"})
+    if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({"error": "No data provided for update"});
     }
+
 
     const {name, email, age} = req.body
 
-    if (!isValidEmail(email)) {
+    if (name && typeof name != 'string') {
+        return res.status(400).json({"error": "Name must be a string"})
+    }
+
+    if (email && typeof email != 'string') {
+        return res.status(400).json({"error": "Email must be a string"})
+    }
+
+    if (age !== undefined && (typeof age !== 'number' || age < 0 || Number.isNaN(age)))  {
+            return res.status(400).json({"error": "Age must be a number"})
+    }
+
+    if (email && !isValidEmail(email)) {
         return res.status(400).json({"Bad Request": "INVALID EMAIL FORMAT"});
     }
 
     const allData = [...storage.values()]
+    const currentUser = storage.get(id)
 
-    if (allData.some(user => user.name === name || user.email === email)) {
-    return res.status(409).json({"Conflict" : 'Name or Email already Exist!'});
-}
+    if (name && allData.some(user => user.name === name && user !== currentUser)) {
+            return res.status(409).json({"Conflict" : 'Name already Exist!'});
+    }
+
+    if (email && allData.some(user => user.email === email && user !== currentUser)) {
+            return res.status(409).json({"Conflict" : 'Email already Exist!'});
+    }
 
     try {
 
-        const data = storage.get(id)
-        if (name) data.name = name
-        if (email) data.email = email
-        if (age) data.age = age
-        data.updatedAt = new Date().toLocaleString()
+        if (name) currentUser.name = name
+        if (email) currentUser.email = email
+        if (age !== undefined) currentUser.age = age
+        currentUser.updatedAt = new Date().toISOString()
 
-        storage.set(id, data)
+        storage.set(id, currentUser)
 
         return res.status(200).json({
             "message" : "User Updated Succesfully",
-            "update" : data
+            "update" : currentUser
         })
 
     } catch (error) {

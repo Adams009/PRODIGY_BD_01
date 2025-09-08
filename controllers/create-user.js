@@ -6,11 +6,20 @@ function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 const create = async (req, res) => {
-    if (!req.body || typeof req.body.name != 'string' || typeof req.body.email != 'string' || typeof req.body.age != 'number') {
-        return res.status(400).json({"Bad Request": 'INVALID REQUEST : MISSING FIELD'})
+    
+    const { name, email, age } = req.body
+
+    if (!name || typeof name != 'string') {
+            return res.status(400).json({"error": "Name must be a string and it must be provided"})
     }
 
-    const { name, email, age } = req.body
+    if (!email || typeof email != 'string') {
+            return res.status(400).json({"error": "Email must be a string and it must be provided"})
+    }
+
+    if (age === undefined || typeof age != 'number' || age < 0 || Number.isNaN(age)) {
+            return res.status(400).json({"error": "Age must be a number and it must be provided"})
+    }
 
     if (!isValidEmail(email)) {
         return res.status(400).json({"Bad Request": "INVALID EMAIL FORMAT"});
@@ -28,8 +37,8 @@ const create = async (req, res) => {
             name,
             email,
             age,
-            createdAt : new Date().toLocaleString(),
-            updatedAt : new Date().toLocaleString()
+            createdAt : new Date().toISOString(),
+            updatedAt : new Date().toISOString()
         }
 
         storage.set(user.id, user)

@@ -12,7 +12,7 @@ const deleted = async (req, res) => {
 
     try {
         storage.delete(id)
-        return res.status(204).json({"message" : "User deleted successfully"})
+        return res.status(200).json({"message" : "User deleted successfully"})
     } catch (error) {
         return res.status(500).json({error : "Unexpected Internal Error Occurred"})
     }
