@@ -1,5 +1,8 @@
 import storage from "../model/hashmap-storage.js";
 
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 const update = async (req, res) => {
     const id = req.params.id
     if (!id) {
@@ -15,6 +18,10 @@ const update = async (req, res) => {
     }
 
     const {name, email, age} = req.body
+
+    if (!isValidEmail(email)) {
+        return res.status(400).json({"Bad Request": "INVALID EMAIL FORMAT"});
+    }
 
     const allData = [...storage.values()]
 

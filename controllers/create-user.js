@@ -1,12 +1,20 @@
 import { v4 as uuid4 } from "uuid";
 import storage from "../model/hashmap-storage.js";
 
+
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 const create = async (req, res) => {
     if (!req.body || typeof req.body.name != 'string' || typeof req.body.email != 'string' || typeof req.body.age != 'number') {
         return res.status(400).json({"Bad Request": 'INVALID REQUEST : MISSING FIELD'})
     }
 
     const { name, email, age } = req.body
+
+    if (!isValidEmail(email)) {
+        return res.status(400).json({"Bad Request": "INVALID EMAIL FORMAT"});
+    }
 
     const allData = [...storage.values()]
 
